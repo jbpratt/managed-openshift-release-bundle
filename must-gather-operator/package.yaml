@@ -5,7 +5,7 @@ metadata:
   annotations:
     package-operator.run/phase: deploy
 spec:
-  image: ghcr.io/jbpratt/must-gather-operator:4.16-0-22d33ff
+  image: ghcr.io/jbpratt/must-gather-operator:4.16.0-22d33dd
   config:
     registry_img: quay.io/app-sre/must-gather-operator-registry
     image_digest: sha256:6d15c714a9833b51f72442e7c4a57ca498b5e4d18ce599d36d1cad4bde6af8b6
