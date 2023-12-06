@@ -48,4 +48,4 @@ _COMMIT=$(git rev-parse --short HEAD)
 # _BUILD_NUMBER=
 
 # package with PKO
-kubectl package build --push --tag ${_BUNDLE_REGISTRY}:${_BRANCH}-${_COMMIT} ./resources
+kubectl package build --push --tag ${_BUNDLE_REGISTRY}:${_BRANCH/#release-}-${_COMMIT} ./resources
