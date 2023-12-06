@@ -2,6 +2,8 @@
 
 set -e
 
+_BUNDLE_REGISTRY=ghcr.io/jbpratt/managed-openshift/release-bundle
+
 OPERATOR=$1
 COMMIT=$2
 TEMPLATE=https://raw.githubusercontent.com/openshift/${OPERATOR}/${COMMIT}/hack/olm-registry/olm-artifacts-template.yaml
@@ -13,14 +15,13 @@ IMAGE_DIGEST=$(skopeo inspect --format '{{.Digest}}' docker://${REGISTRY_IMG}:${
 CHANNEL=${IMAGE_TAG%%-*}
 
 _OUTDIR=resources/${OPERATOR}
-_BUNDLE_REGISTRY=ghcr.io/jbpratt/managed-openshift/release-bundle
 
 mkdir -p ${_OUTDIR}
 
-# download template
+echo "Downloading template..."
 _RAW_TEMPLATE=$(curl -sL ${TEMPLATE} | sed 's/apiVersion: v1/apiVersion: template.openshift.io\/v1/')
 
-# process the template
+echo "Process template with parameters..."
 _PROCESSED_TEMPLATE=$(oc process \
 	--local \
 	--output=yaml \
@@ -33,24 +34,32 @@ _PROCESSED_TEMPLATE=$(oc process \
 	IMAGE_DIGEST=${IMAGE_DIGEST} <<<${_RAW_TEMPLATE})
 
 # append the package-operator.run/phase to each resource and write out file
+echo "Appending 'package-operator.run/phase' to every object and writing to ${_OUTDIR} ..."
 yq '
-    .items[0].spec.resources[].metadata.annotations += {"package-operator.run/phase":"deploy"} |
     .items[0].spec.resources[] |
+    select(.kind=="Namespace") |
+    .metadata.annotations += {"package-operator.run/phase": "namespace"}
+   ' <<<${_PROCESSED_TEMPLATE} >${_OUTDIR}/namespace.yaml
+yq '
+    .items[0].spec.resources[] |
+    select(.kind != "Namespace") |
+    .metadata.annotations += {"package-operator.run/phase":"deploy"} |
     split_doc' <<<${_PROCESSED_TEMPLATE} >${_OUTDIR}/resources.yaml
 
 if git diff --quiet --exit-code --cached; then
 	echo "No changes" && exit 1
 fi
 
-# commit changes
+echo "Committing changes..."
 git add ${_OUTDIR}
 git commit -m "${OPERATOR}: ${COMMIT:1:7}"
 # git push
 
 _BRANCH=$(git rev-parse --abbrev-ref HEAD)
 _COMMIT=$(git rev-parse --short HEAD)
+_TAG=${_BUNDLE_REGISTRY}:${_BRANCH/#release-/}-${_COMMIT}
 # TODO: How to determine the build#?
 # _BUILD_NUMBER=
 
-# package with PKO
-kubectl package build --push --tag ${_BUNDLE_REGISTRY}:${_BRANCH/#release-/}-${_COMMIT} ./resources
+echo "Building and pushing package ${_TAG} ..."
+kubectl package build --push --tag ${_TAG} ./resources
