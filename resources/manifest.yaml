@@ -7,4 +7,5 @@ spec:
   - Namespaced
   - Cluster
   phases:
+  - name: namespace
   - name: deploy
