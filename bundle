@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -ex
+
+OPERATOR=$1
+COMMIT=$2
+TEMPLATE=https://raw.githubusercontent.com/openshift/${OPERATOR}/${COMMIT}/hack/olm-registry/olm-artifacts-template.yaml
+
+REGISTRY_IMG=quay.io/app-sre/${OPERATOR}-registry
+# TODO: values should come from operator build pipeline
+IMAGE_TAG=staging-latest
+IMAGE_DIGEST=$(skopeo inspect --format '{{.Digest}}' docker://${REGISTRY_IMG}:${IMAGE_TAG} | tr -d "\r")
+CHANNEL=${IMAGE_TAG%%-*}
+
+_OUTDIR=resources/${OPERATOR}
+
+mkdir -p ${_OUTDIR}
+
+# download template
+RAW_TEMPLATE=$(curl -sL ${TEMPLATE} | sed 's/apiVersion: v1/apiVersion: template.openshift.io\/v1/')
+
+# process the template
+PROCESSED_TEMPLATE=$(oc process \
+	--local \
+	--output=yaml \
+	--ignore-unknown-parameters \
+	--filename \
+	${TEMPLATE} \
+	REGISTRY_IMG=${REGISTRY_IMG} \
+	CHANNEL=${CHANNEL} \
+	IMAGE_TAG=${IMAGE_TAG} \
+	IMAGE_DIGEST=${IMAGE_DIGEST} <<<${RAW_TEMPLATE})
+
+# append the package-operator.run/phase to each resource and write out file
+yq '
+    .items[0].spec.resources.[].metadata.annotations += {"package-operator.run/phase":"deploy"} |
+    .items[0].spec.resources[] |
+    split_doc' <<<${PROCESSED_TEMPLATE} >${_OUTDIR}/resources.yaml
+
+git add ${_OUTDIR}
