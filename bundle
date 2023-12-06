@@ -13,6 +13,7 @@ IMAGE_DIGEST=$(skopeo inspect --format '{{.Digest}}' docker://${REGISTRY_IMG}:${
 CHANNEL=${IMAGE_TAG%%-*}
 
 _OUTDIR=resources/${OPERATOR}
+_BUNDLE_REGISTRY=ghcr.io/jbpratt/managed-openshift/release-bundle
 
 mkdir -p ${_OUTDIR}
 
@@ -37,4 +38,14 @@ yq '
     .items[0].spec.resources[] |
     split_doc' <<<${PROCESSED_TEMPLATE} >${_OUTDIR}/resources.yaml
 
+# commit changes
 git add ${_OUTDIR}
+git commit -m "${OPERATOR}: ${COMMIT:1:7}"
+
+_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+_COMMIT=$(git rev-parse --short HEAD)
+# TODO: How to determine the build#?
+# _BUILD_NUMBER=
+
+# package with PKO
+kubectl package build --push --tag ${_BUNDLE_REGISTRY}:${_BRANCH}-${_COMMIT} ./resources
