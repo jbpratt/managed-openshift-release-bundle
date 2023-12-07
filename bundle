@@ -15,8 +15,7 @@ IMAGE_DIGEST=$(skopeo inspect --format '{{.Digest}}' docker://"${REGISTRY_IMG}":
 CHANNEL=${IMAGE_TAG%%-*}
 
 _OUTDIR=resources/${OPERATOR}
-
-mkdir -p "${_OUTDIR}"
+rm -rf "${_OUTDIR}" && mkdir -p "${_OUTDIR}"
 
 echo "Downloading template..."
 _RAW_TEMPLATE=$(curl -sL "${TEMPLATE}" | sed 's/apiVersion: v1/apiVersion: template.openshift.io\/v1/')
@@ -40,7 +39,7 @@ yq "
     split_doc" <<<"${_PROCESSED_TEMPLATE}" >"${_OUTDIR}"/resources.yaml
 
 # add new operator phase if it doesn't exist
-if ! grep -q "${OPERATOR}" resources/manifest; then
+if ! grep -q "${OPERATOR}" resources/manifest.yaml; then
 	yq -i ".spec.phases += {\"name\": \"${OPERATOR}\"}" resources/manifest.yaml
 fi
 

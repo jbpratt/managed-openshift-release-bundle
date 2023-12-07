@@ -4,8 +4,9 @@ metadata:
   name: managed-openshift-release-bundle
 spec:
   scopes:
-  - Namespaced
-  - Cluster
+    - Namespaced
+    - Cluster
   phases:
-  - name: namespace
-  - name: deploy
+    - name: managed-upgrade-operator
+    - name: ocm-agent-operator
+    - name: route-monitor-operator
