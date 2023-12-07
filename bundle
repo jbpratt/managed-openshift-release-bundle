@@ -11,15 +11,15 @@ TEMPLATE=https://raw.githubusercontent.com/openshift/${OPERATOR}/${COMMIT}/hack/
 # TODO: values should come from operator build pipeline
 REGISTRY_IMG=quay.io/app-sre/${OPERATOR}-registry
 IMAGE_TAG=staging-latest
-IMAGE_DIGEST=$(skopeo inspect --format '{{.Digest}}' docker://${REGISTRY_IMG}:${IMAGE_TAG} | tr -d "\r")
+IMAGE_DIGEST=$(skopeo inspect --format '{{.Digest}}' docker://"${REGISTRY_IMG}":"${IMAGE_TAG}" | tr -d "\r")
 CHANNEL=${IMAGE_TAG%%-*}
 
 _OUTDIR=resources/${OPERATOR}
 
-mkdir -p ${_OUTDIR}
+mkdir -p "${_OUTDIR}"
 
 echo "Downloading template..."
-_RAW_TEMPLATE=$(curl -sL ${TEMPLATE} | sed 's/apiVersion: v1/apiVersion: template.openshift.io\/v1/')
+_RAW_TEMPLATE=$(curl -sL "${TEMPLATE}" | sed 's/apiVersion: v1/apiVersion: template.openshift.io\/v1/')
 
 echo "Process template with parameters..."
 _PROCESSED_TEMPLATE=$(oc process \
@@ -27,39 +27,32 @@ _PROCESSED_TEMPLATE=$(oc process \
 	--output=yaml \
 	--ignore-unknown-parameters \
 	--filename \
-	${TEMPLATE} \
-	REGISTRY_IMG=${REGISTRY_IMG} \
-	CHANNEL=${CHANNEL} \
-	IMAGE_TAG=${IMAGE_TAG} \
-	IMAGE_DIGEST=${IMAGE_DIGEST} <<<${_RAW_TEMPLATE})
+	"${TEMPLATE}" \
+	REGISTRY_IMG="${REGISTRY_IMG}" \
+	CHANNEL="${CHANNEL}" \
+	IMAGE_TAG="${IMAGE_TAG}" \
+	IMAGE_DIGEST="${IMAGE_DIGEST}" <<<"${_RAW_TEMPLATE}")
 
-# append the package-operator.run/phase to each resource and write out file
 echo "Appending 'package-operator.run/phase' to every object and writing to ${_OUTDIR} ..."
-yq '
+yq "
     .items[0].spec.resources[] |
-    select(.kind=="Namespace") |
-    .metadata.annotations += {"package-operator.run/phase": "namespace"}
-   ' <<<${_PROCESSED_TEMPLATE} >${_OUTDIR}/namespace.yaml
-yq '
-    .items[0].spec.resources[] |
-    select(.kind != "Namespace") |
-    .metadata.annotations += {"package-operator.run/phase":"deploy"} |
-    split_doc' <<<${_PROCESSED_TEMPLATE} >${_OUTDIR}/resources.yaml
+    .metadata.annotations += {\"package-operator.run/phase\":\"${OPERATOR}\"} |
+    split_doc" <<<"${_PROCESSED_TEMPLATE}" >"${_OUTDIR}"/resources.yaml
+
+git add "${_OUTDIR}"
 
 if git diff --quiet --exit-code --cached; then
 	echo "No changes" && exit 1
 fi
 
 echo "Committing changes..."
-git add ${_OUTDIR}
 git commit -m "${OPERATOR}: ${COMMIT:1:7}"
 # git push
 
 _BRANCH=$(git rev-parse --abbrev-ref HEAD)
 _COMMIT=$(git rev-parse --short HEAD)
-_TAG=${_BUNDLE_REGISTRY}:${_BRANCH/#release-/}-${_COMMIT}
-# TODO: How to determine the build#?
-# _BUILD_NUMBER=
+_BUILD_NUMBER=$(git rev-list "$(git rev-list --parents HEAD | grep -E "^[a-f0-9]{40}$$")"..HEAD --count)
+_TAG=${_BUNDLE_REGISTRY}:${_BRANCH/#release-/}-${_BUILD_NUMBER}-${_COMMIT}
 
 echo "Building and pushing package ${_TAG} ..."
-kubectl package build --push --tag ${_TAG} ./resources
+kubectl package build --push --tag "${_TAG}" ./resources
