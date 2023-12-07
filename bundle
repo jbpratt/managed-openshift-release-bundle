@@ -39,6 +39,11 @@ yq "
     .metadata.annotations += {\"package-operator.run/phase\":\"${OPERATOR}\"} |
     split_doc" <<<"${_PROCESSED_TEMPLATE}" >"${_OUTDIR}"/resources.yaml
 
+# add new operator phase if it doesn't exist
+if ! grep -q "${OPERATOR}" resources/manifest; then
+	yq -i ".spec.phases += {\"name\": \"${OPERATOR}\"}" resources/manifest.yaml
+fi
+
 git add "${_OUTDIR}"
 
 if git diff --quiet --exit-code --cached; then
