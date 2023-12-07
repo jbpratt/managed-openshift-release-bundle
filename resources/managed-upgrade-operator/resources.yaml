@@ -1,10 +1,19 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    openshift.io/cluster-monitoring: "true"
+  name: openshift-managed-upgrade-operator
+  annotations:
+    package-operator.run/phase: managed-upgrade-operator
+---
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
   name: managed-upgrade-operator-catalog
   namespace: openshift-managed-upgrade-operator
   annotations:
-    package-operator.run/phase: deploy
+    package-operator.run/phase: managed-upgrade-operator
 spec:
   displayName: Managed Upgrade Operator
   grpcPodConfig:
@@ -24,7 +33,7 @@ kind: OperatorGroup
 metadata:
   annotations:
     olm.operatorframework.io/exclude-global-namespace-resolution: "true"
-    package-operator.run/phase: deploy
+    package-operator.run/phase: managed-upgrade-operator
   name: managed-upgrade-operator-og
   namespace: openshift-managed-upgrade-operator
 spec:
@@ -37,7 +46,7 @@ metadata:
   name: managed-upgrade-operator
   namespace: openshift-managed-upgrade-operator
   annotations:
-    package-operator.run/phase: deploy
+    package-operator.run/phase: managed-upgrade-operator
 spec:
   channel: staging
   name: managed-upgrade-operator
@@ -50,7 +59,7 @@ metadata:
   name: muo-monitoring-reader
   namespace: openshift-monitoring
   annotations:
-    package-operator.run/phase: deploy
+    package-operator.run/phase: managed-upgrade-operator
 rules:
   - apiGroups:
       - ""
@@ -78,7 +87,7 @@ metadata:
   name: muo-pullsecret-reader
   namespace: openshift-config
   annotations:
-    package-operator.run/phase: deploy
+    package-operator.run/phase: managed-upgrade-operator
 rules:
   - apiGroups:
       - ""
@@ -95,7 +104,7 @@ metadata:
   name: muo-monitoring-reader
   namespace: openshift-monitoring
   annotations:
-    package-operator.run/phase: deploy
+    package-operator.run/phase: managed-upgrade-operator
 roleRef:
   kind: Role
   name: muo-monitoring-reader
@@ -110,7 +119,7 @@ metadata:
   name: muo-pullsecret-reader
   namespace: openshift-config
   annotations:
-    package-operator.run/phase: deploy
+    package-operator.run/phase: managed-upgrade-operator
 roleRef:
   kind: Role
   name: muo-pullsecret-reader
