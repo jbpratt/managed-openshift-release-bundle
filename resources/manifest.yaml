@@ -11,3 +11,4 @@ spec:
     - name: ocm-agent-operator
     - name: route-monitor-operator
     - name: must-gather-operator
+    - name: osd-metrics-exporter
