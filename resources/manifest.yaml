@@ -10,3 +10,4 @@ spec:
     - name: managed-upgrade-operator
     - name: ocm-agent-operator
     - name: route-monitor-operator
+    - name: must-gather-operator
