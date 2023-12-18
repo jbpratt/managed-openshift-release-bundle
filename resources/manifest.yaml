@@ -12,3 +12,4 @@ spec:
     - name: route-monitor-operator
     - name: must-gather-operator
     - name: osd-metrics-exporter
+    - name: rbac-permissions-operator
