@@ -73,7 +73,8 @@ log "Building and pushing package ${_TAG} ..."
 kubectl package build --push --tag "${_TAG}" ./resources
 
 cat <<EOF
-oc apply -f - <<END apiVersion: package-operator.run/v1alpha1
+oc apply -f - <<END
+apiVersion: package-operator.run/v1alpha1
 kind: ClusterPackage
 metadata:
   name: managed-openshift-release-bundle
