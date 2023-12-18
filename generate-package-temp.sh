@@ -41,8 +41,13 @@ _PROCESSED_TEMPLATE=$(oc process \
 log "Appending 'package-operator.run/phase' to every object and writing to ${_OUTDIR} ..."
 yq "
     .items[0].spec.resources[] |
+    select(.kind!=\"Namespace\") |
     .metadata.annotations += {\"package-operator.run/phase\":\"${OPERATOR}\"} |
     split_doc" <<<"${_PROCESSED_TEMPLATE}" >"${_OUTDIR}"/resources.yaml
+yq "
+    .items[0].spec.resources[] |
+    select(.kind==\"Namespace\") |
+    .metadata.annotations += {\"package-operator.run/phase\": \"namespaces\"}" <<<"${_PROCESSED_TEMPLATE}" >"${_OUTDIR}"/namespace.yaml
 
 # add new operator phase if it doesn't exist
 if ! grep -q "${OPERATOR}" resources/manifest.yaml; then
@@ -73,5 +78,5 @@ kind: ClusterPackage
 metadata:
   name: managed-openshift-release-bundle
 spec:
-  image: ${TAG}
+  image: ${_TAG}
 EOF
