@@ -2,6 +2,12 @@
 
 set -e
 
+# TODO: assert required tools (oc, yq, curl, git, kubectl, kubectl-package)
+
+function log() {
+    echo "[bundle] ${1}"
+}
+
 _BUNDLE_REGISTRY=ghcr.io/jbpratt/managed-openshift/release-bundle
 
 OPERATOR=$1
@@ -17,10 +23,10 @@ CHANNEL=${IMAGE_TAG%%-*}
 _OUTDIR=resources/${OPERATOR}
 rm -rf "${_OUTDIR}" && mkdir -p "${_OUTDIR}"
 
-echo "Downloading template..."
+log "Downloading template..."
 _RAW_TEMPLATE=$(curl -sL "${TEMPLATE}" | sed 's/apiVersion: v1/apiVersion: template.openshift.io\/v1/')
 
-echo "Process template with parameters..."
+log "Process template with parameters..."
 _PROCESSED_TEMPLATE=$(oc process \
 	--local \
 	--output=yaml \
@@ -32,7 +38,7 @@ _PROCESSED_TEMPLATE=$(oc process \
 	IMAGE_TAG="${IMAGE_TAG}" \
 	IMAGE_DIGEST="${IMAGE_DIGEST}" <<<"${_RAW_TEMPLATE}")
 
-echo "Appending 'package-operator.run/phase' to every object and writing to ${_OUTDIR} ..."
+log "Appending 'package-operator.run/phase' to every object and writing to ${_OUTDIR} ..."
 yq "
     .items[0].spec.resources[] |
     .metadata.annotations += {\"package-operator.run/phase\":\"${OPERATOR}\"} |
@@ -46,11 +52,11 @@ fi
 git add "${_OUTDIR}" resources/manifest.yaml
 
 if git diff --quiet --exit-code --cached; then
-	echo "No changes" && exit 1
+	log "No changes" && exit 1
 fi
 
-echo "Committing changes..."
-git commit -m "${OPERATOR}: ${COMMIT:1:7}"
+log "Committing changes..."
+git commit --quiet --message "${OPERATOR}: ${COMMIT:1:7}"
 # git push
 
 _BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -58,5 +64,5 @@ _COMMIT=$(git rev-parse --short HEAD)
 _BUILD_NUMBER=$(git rev-list --count HEAD)
 _TAG=${_BUNDLE_REGISTRY}:${_BRANCH/#release-/}-${_BUILD_NUMBER}-${_COMMIT}
 
-echo "Building and pushing package ${_TAG} ..."
+log "Building and pushing package ${_TAG} ..."
 kubectl package build --push --tag "${_TAG}" ./resources
