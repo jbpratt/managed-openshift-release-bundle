@@ -43,14 +43,6 @@ metadata:
   annotations:
     package-operator.run/phase: osd-metrics-exporter
 spec:
-  affinity:
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - preference:
-            matchExpressions:
-              - key: node-role.kubernetes.io/infra
-                operator: Exists
-          weight: 1
   displayName: OSD Metrics Exporter
   grpcPodConfig:
     nodeSelector:
@@ -66,10 +58,6 @@ spec:
   image: quay.io/app-sre/osd-metrics-exporter-registry@sha256:1e23f9bb6a9a42bc4046d10f1e6a2693f38a8580cdfbabf279573f74998c4ae0
   publisher: Red Hat
   sourceType: grpc
-  tolerations:
-    - effect: NoSchedule
-      key: node-role.kubernetes.io/infra
-      operator: Exists
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -107,7 +95,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: osd-metrics-exporter-watch-configmaps
-  namespace: openshift-config
 subjects:
   - kind: ServiceAccount
     name: osd-metrics-exporter

@@ -43,14 +43,6 @@ metadata:
   annotations:
     package-operator.run/phase: rbac-permissions-operator
 spec:
-  affinity:
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - preference:
-            matchExpressions:
-              - key: node-role.kubernetes.io/infra
-                operator: Exists
-          weight: 1
   displayName: RBAC Permissions Operator
   grpcPodConfig:
     nodeSelector:
@@ -66,10 +58,6 @@ spec:
   image: quay.io/app-sre/rbac-permissions-operator-registry@sha256:d50bf707dd619a265b190dbec5b6af3e3f07ce4d7f467894b6561cf4070eed30
   publisher: Red Hat
   sourceType: grpc
-  tolerations:
-    - effect: NoSchedule
-      key: node-role.kubernetes.io/infra
-      operator: Exists
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
