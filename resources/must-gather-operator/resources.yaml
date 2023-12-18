@@ -18,14 +18,6 @@ metadata:
   annotations:
     package-operator.run/phase: must-gather-operator
 spec:
-  affinity:
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - preference:
-            matchExpressions:
-              - key: node-role.kubernetes.io/infra
-                operator: Exists
-          weight: 1
   displayName: must-gather-operator
   grpcPodConfig:
     nodeSelector:
@@ -38,13 +30,9 @@ spec:
   icon:
     base64data: ""
     mediatype: ""
-  image: quay.io/app-sre/must-gather-operator-registry@sha256:1ddcf568cd97ac36d8f866c212a34bca2d1743f0896de5dfff1006f2160b17cc
+  image: quay.io/app-sre/must-gather-operator-registry@sha256:5b3c921406e9c90f4da393e7711b95897e1c2076964cf2f2e563629f3fc3b0a2
   publisher: Red Hat
   sourceType: grpc
-  tolerations:
-    - effect: NoSchedule
-      key: node-role.kubernetes.io/infra
-      operator: Exists
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription

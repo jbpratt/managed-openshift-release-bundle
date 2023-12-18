@@ -24,4 +24,8 @@ spec:
           description: denoting whether the cluster is privatelink
           type: boolean
           default: false
+        api.openshift.com/fedramp:
+          description: denoting whether the cluster is fedramp
+          type: boolean
+          default: false
       type: object
