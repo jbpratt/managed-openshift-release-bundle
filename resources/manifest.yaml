@@ -13,3 +13,15 @@ spec:
     - name: must-gather-operator
     - name: osd-metrics-exporter
     - name: rbac-permissions-operator
+  config:
+    openAPIV3Schema:
+      properties:
+        api.openshift.com/sts:
+          description: denoting whether the cluster is STS
+          type: boolean
+          default: false
+        api.openshift.com/private-link:
+          description: denoting whether the cluster is privatelink
+          type: boolean
+          default: false
+      type: object

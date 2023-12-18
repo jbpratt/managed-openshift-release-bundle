@@ -1,3 +1,4 @@
+{{- if api.openshift.com/sts or api.openshift.com/private-link }}
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -138,3 +139,4 @@ subjects:
   - kind: ServiceAccount
     name: ocm-agent-operator
     namespace: openshift-ocm-agent-operator
+{{- end }}
