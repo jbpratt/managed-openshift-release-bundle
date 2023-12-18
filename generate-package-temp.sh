@@ -67,7 +67,7 @@ git commit --quiet --message "${OPERATOR}: ${COMMIT:1:7}"
 _BRANCH=$(git rev-parse --abbrev-ref HEAD)
 _COMMIT=$(git rev-parse --short HEAD)
 _BUILD_NUMBER=$(git rev-list --count HEAD)
-_TAG=${_BUNDLE_REGISTRY}:${_BRANCH/#release-/}-${_BUILD_NUMBER}-${_COMMIT}
+_TAG=${_BUNDLE_REGISTRY}:${_BRANCH/#release-/}.${_BUILD_NUMBER}-${_COMMIT}
 
 log "Building and pushing package ${_TAG} ..."
 kubectl package build --push --tag "${_TAG}" ./resources
