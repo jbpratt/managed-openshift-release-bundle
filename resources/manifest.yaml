@@ -13,6 +13,7 @@ spec:
     - name: must-gather-operator
     - name: osd-metrics-exporter
     - name: rbac-permissions-operator
+    - name: managed-upgrade-operator
   config:
     openAPIV3Schema:
       properties:
