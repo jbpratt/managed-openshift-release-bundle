@@ -16,7 +16,7 @@ spec:
   config:
     openAPIV3Schema:
       properties:
-        api.openshift.com/fedramp:
+        fedramp:
           description: denoting whether the cluster is fedramp
           type: boolean
           default: false

@@ -1,4 +1,4 @@
-{{- if eq "api.openshift.com/fedramp" true }}
+{{- if eq .config.fedramp true }}
 apiVersion: v1
 kind: Namespace
 metadata:
