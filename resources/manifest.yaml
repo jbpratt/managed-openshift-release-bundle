@@ -16,14 +16,6 @@ spec:
   config:
     openAPIV3Schema:
       properties:
-        api.openshift.com/sts:
-          description: denoting whether the cluster is STS
-          type: boolean
-          default: false
-        api.openshift.com/private-link:
-          description: denoting whether the cluster is privatelink
-          type: boolean
-          default: false
         api.openshift.com/fedramp:
           description: denoting whether the cluster is fedramp
           type: boolean

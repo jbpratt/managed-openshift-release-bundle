@@ -1,3 +1,4 @@
+{{- if eq "api.openshift.com/fedramp" true }}
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -104,3 +105,4 @@ metadata:
 spec:
   targetNamespaces:
     - openshift-rbac-permissions
+{{- end }}
