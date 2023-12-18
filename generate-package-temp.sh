@@ -5,7 +5,7 @@ set -e
 # TODO: assert required tools (oc, yq, curl, git, kubectl, kubectl-package)
 
 function log() {
-    echo "[bundle] ${1}"
+	echo "[bundle] ${1}"
 }
 
 _BUNDLE_REGISTRY=ghcr.io/jbpratt/managed-openshift/release-bundle
@@ -66,3 +66,12 @@ _TAG=${_BUNDLE_REGISTRY}:${_BRANCH/#release-/}-${_BUILD_NUMBER}-${_COMMIT}
 
 log "Building and pushing package ${_TAG} ..."
 kubectl package build --push --tag "${_TAG}" ./resources
+
+cat <<EOF
+apiVersion: package-operator.run/v1alpha1
+kind: ClusterPackage
+metadata:
+  name: managed-openshift-release-bundle
+spec:
+  image: ${TAG}
+EOF
