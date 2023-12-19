@@ -1,3 +1,4 @@
+{{- if .config.fedramp }}
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
@@ -126,3 +127,4 @@ subjects:
   - kind: ServiceAccount
     name: ocm-agent-operator
     namespace: openshift-ocm-agent-operator
+{{- end }}
