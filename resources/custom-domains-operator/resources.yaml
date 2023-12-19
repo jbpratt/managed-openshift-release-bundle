@@ -1,0 +1,51 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  labels:
+    opsrc-datastore: "true"
+    opsrc-provider: redhat
+  name: custom-domains-operator-registry
+  namespace: openshift-custom-domains-operator
+  annotations:
+    package-operator.run/phase: custom-domains-operator
+spec:
+  displayName: Custom Domains Operator
+  grpcPodConfig:
+    nodeSelector:
+      node-role.kubernetes.io: infra
+    securityContextConfig: restricted
+    tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/infra
+        operator: Exists
+  icon:
+    base64data: ""
+    mediatype: ""
+  image: quay.io/app-sre/custom-domains-operator-registry@sha256:e69c2a70b2daca8b02713f506f66ead0afc1ddbef3bd74e24d9f40b8928a993a
+  publisher: Red Hat
+  sourceType: grpc
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: custom-domains-operator
+  namespace: openshift-custom-domains-operator
+  annotations:
+    package-operator.run/phase: custom-domains-operator
+spec:
+  channel: staging
+  name: custom-domains-operator
+  source: custom-domains-operator-registry
+  sourceNamespace: openshift-custom-domains-operator
+---
+apiVersion: operators.coreos.com/v1alpha2
+kind: OperatorGroup
+metadata:
+  annotations:
+    olm.operatorframework.io/exclude-global-namespace-resolution: "true"
+    package-operator.run/phase: custom-domains-operator
+  name: custom-domains-operator
+  namespace: openshift-custom-domains-operator
+spec:
+  targetNamespaces:
+    - openshift-custom-domains-operator
