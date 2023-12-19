@@ -1,0 +1,22 @@
+apiVersion: package-operator.run/v1alpha1
+kind: ClusterObjectTemplate
+metadata:
+  name: managed-openshift-release-bundle-template
+spec:
+  sources:
+  - apiVersion: v1
+    items:
+    - destination: .fedramp
+      key: .data.fedramp
+    kind: ConfigMap
+    name: cluster-config
+    namespace: openshift-config
+    optional: true
+  template: |
+    apiVersion: package-operator.run/v1alpha1
+    kind: ClusterPackage
+    metadata:
+      name: managed-openshift-release-bundle
+    spec:
+      image: ghcr.io/jbpratt/managed-openshift/release-bundle:4.16.49-c37a58c
+      config: {{toJson .config}}

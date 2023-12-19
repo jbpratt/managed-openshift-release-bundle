@@ -19,6 +19,6 @@ spec:
       properties:
         fedramp:
           description: denoting whether the cluster is fedramp
-          type: boolean
-          default: false
+          type: string
+          default: "false"
       type: object

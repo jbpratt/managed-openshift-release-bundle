@@ -1,0 +1,6 @@
+apiVersion: package-operator.run/v1alpha1
+kind: ClusterPackage
+metadata:
+  name: managed-openshift-release-bundle
+spec:
+  image: ghcr.io/jbpratt/managed-openshift/release-bundle:4.16.45-fb5b56e
