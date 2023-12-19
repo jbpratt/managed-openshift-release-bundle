@@ -8,6 +8,8 @@ function log() {
 	echo "[bundle] ${1}"
 }
 
+pushd $(git rev-parse --show-toplevel)
+
 _BUNDLE_REGISTRY=ghcr.io/jbpratt/managed-openshift/release-bundle
 
 OPERATOR=$1
@@ -73,6 +75,7 @@ log "Building and pushing package ${_TAG} ..."
 kubectl package build --push --tag "${_TAG}" ./resources
 
 cat <<EOF
+
 oc apply -f - <<END
 apiVersion: package-operator.run/v1alpha1
 kind: ClusterPackage
@@ -81,4 +84,7 @@ metadata:
 spec:
   image: ${_TAG}
 END
+
 EOF
+
+popd
